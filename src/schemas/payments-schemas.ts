@@ -7,6 +7,6 @@ export const paymentDataSchema = Joi.object({
     number: Joi.number().integer().required(),
     name: Joi.string().required(),
     expirationDate: Joi.string().required(),
-    cvv: Joi.number().integer().required(),
+    cvc: Joi.number().integer().required(),
   }).required(),
 });
