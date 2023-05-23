@@ -14,6 +14,15 @@ export async function listDates(req: AuthenticatedRequest, res: Response, next: 
   }
 }
 
+export async function listAuditoriums(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  try {
+    const auditoriums = await activityService.getAuditoriums();
+    return res.status(httpStatus.OK).send(auditoriums);
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function listActivityByDate(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
     const { dateActivityId } = req.params;

@@ -21,6 +21,12 @@ async function checkEnrollmentTicket(userId: number) {
   }
 }
 
+async function getAuditoriums() {
+  const auditoriums = await activityRepository.findAuditoriums();
+  if (!auditoriums) throw notFoundError();
+
+  return auditoriums;
+}
 async function getDates(userId: number) {
   await checkEnrollmentTicket(userId);
 
@@ -52,6 +58,7 @@ const activityService = {
   getDates,
   getActivityByDate,
   subscribingActivity,
+  getAuditoriums,
 };
 
 export default activityService;
