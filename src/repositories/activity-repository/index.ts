@@ -4,6 +4,10 @@ async function findDates() {
   return prisma.dateActivity.findMany();
 }
 
+async function findAuditoriums() {
+  return prisma.auditorium.findMany();
+}
+
 async function findActivityByDate(dateActivityId: number) {
   return prisma.activity.findMany({
     where: {
@@ -41,6 +45,7 @@ const activityRepository = {
   findActivityByDate,
   findActivityById,
   createSubscriber,
+  findAuditoriums,
 };
 
 export default activityRepository;
