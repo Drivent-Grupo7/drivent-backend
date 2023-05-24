@@ -40,3 +40,16 @@ export async function paymentProcess(req: AuthenticatedRequest, res: Response) {
     return res.sendStatus(httpStatus.NOT_FOUND);
   }
 }
+
+export async function paymentStripe(req: AuthenticatedRequest, res: Response) {
+  const { userId } = req;
+
+  try {
+    const sessionUrl = await paymentsService.paymentStripe(userId);
+    res.send(sessionUrl).status(200);
+  } catch (error) {
+    if (error.name === 'RequestError') {
+      res.sendStatus(500);
+    }
+  }
+}

@@ -1,3 +1,5 @@
+import { Stripe } from 'stripe';
+import ticketService from '../tickets-service';
 import { notFoundError, unauthorizedError } from '@/errors';
 import { CardPaymentParams, PaymentParams } from '@/protocols';
 import enrollmentRepository from '@/repositories/enrollment-repository';
@@ -42,4 +44,20 @@ async function paymentProcess(ticketId: number, userId: number, cardData: CardPa
   return payment;
 }
 
-export default { getPaymentByTicketId, paymentProcess, verifyTicketAndEnrollment };
+async function paymentStripe(userId: number) {
+  try {
+    const ticket = await ticketService.getTicketByUserId(userId);
+    if (!ticket) throw notFoundError();
+
+    await verifyTicketAndEnrollment(ticket.id, userId);
+
+    //const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2022-11-15' });
+
+    //const customer = await stripe.customers.create({})
+    //const session = await stripe.checkout.sessions.create({})
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export default { getPaymentByTicketId, paymentProcess, verifyTicketAndEnrollment, paymentStripe };
