@@ -3,6 +3,7 @@ import supertest from 'supertest';
 import { createEvent } from '../factories';
 import { cleanDb } from '../helpers';
 import app, { init } from '@/app';
+import { client } from '@/config';
 
 beforeAll(async () => {
   await init();
@@ -13,12 +14,14 @@ const server = supertest(app);
 
 describe('GET /event', () => {
   it('should respond with status 404 if there is no event', async () => {
+    await client.del('event');
     const response = await server.get('/event');
 
     expect(response.status).toBe(httpStatus.NOT_FOUND);
   });
 
   it('should respond with status 200 and event data if there is an event', async () => {
+    await client.del('event');
     const event = await createEvent();
 
     const response = await server.get('/event');

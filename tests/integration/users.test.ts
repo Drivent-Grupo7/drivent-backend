@@ -5,7 +5,7 @@ import supertest from 'supertest';
 import { createEvent, createUser } from '../factories';
 import { cleanDb } from '../helpers';
 import { duplicatedEmailError } from '@/services/users-service';
-import { prisma } from '@/config';
+import { prisma, client } from '@/config';
 import app, { init } from '@/app';
 
 beforeAll(async () => {
@@ -37,6 +37,7 @@ describe('POST /users', () => {
     });
 
     it('should respond with status 400 when there is no event', async () => {
+      await client.del('event');
       const body = generateValidBody();
 
       const response = await server.post('/users').send(body);
@@ -45,6 +46,7 @@ describe('POST /users', () => {
     });
 
     it('should respond with status 400 when current event did not started yet', async () => {
+      await client.del('event');
       const event = await createEvent({ startsAt: dayjs().add(1, 'day').toDate() });
       const body = generateValidBody();
 
@@ -55,6 +57,7 @@ describe('POST /users', () => {
 
     describe('when event started', () => {
       beforeAll(async () => {
+        await client.del('event');
         await prisma.event.deleteMany({});
         await createEvent();
       });
