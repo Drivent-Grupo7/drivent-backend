@@ -12,7 +12,7 @@ import {
   generateCreditCardData,
 } from '../factories';
 import { cleanDb, generateValidToken } from '../helpers';
-import { prisma } from '@/config';
+import { prisma, client } from '@/config';
 import app, { init } from '@/app';
 
 beforeAll(async () => {
@@ -21,6 +21,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await cleanDb();
+  await client.del('event');
 });
 
 const server = supertest(app);
