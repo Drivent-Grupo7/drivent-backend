@@ -8,6 +8,6 @@ paymentsRouter
   .all('/*', authenticateToken)
   .get('/', getPaymentByTicketId)
   .post('/process', paymentProcess)
-  .post('create-checkout-session', paymentStripe);
+  .post('/create-checkout-session', paymentStripe);
 
 export { paymentsRouter };

@@ -1,6 +1,6 @@
 import { Stripe } from 'stripe';
 import ticketService from '../tickets-service';
-import { notFoundError, unauthorizedError } from '@/errors';
+import { notFoundError, requestError, unauthorizedError } from '@/errors';
 import { CardPaymentParams, PaymentParams } from '@/protocols';
 import enrollmentRepository from '@/repositories/enrollment-repository';
 import paymentsRepository from '@/repositories/payments-repository';
@@ -51,10 +51,34 @@ async function paymentStripe(userId: number) {
 
     await verifyTicketAndEnrollment(ticket.id, userId);
 
-    //const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2022-11-15' });
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2022-11-15' });
 
-    //const customer = await stripe.customers.create({})
-    //const session = await stripe.checkout.sessions.create({})
+    const customer = await stripe.customers.create({
+      metadata: { userId: userId },
+    });
+
+    const session = await stripe.checkout.sessions.create({
+      line_items: [
+        {
+          price_data: {
+            currency: 'brl',
+            product_data: { name: ticket.TicketType.name },
+            unit_amount: ticket.TicketType.price,
+          },
+          quantity: 1,
+        },
+      ],
+      customer: customer.id,
+      mode: 'payment',
+      success_url: `${process.env.CLIENT_URL}/dashboard/payment`,
+      cancel_url: `${process.env.CLIENT_URL}/dashboard/payment`,
+    });
+
+    if (session.url) {
+      return session.url;
+    } else {
+      return requestError(500, 'STRIPE ERROR');
+    }
   } catch (error) {
     console.log(error);
   }
