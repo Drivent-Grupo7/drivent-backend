@@ -23,7 +23,7 @@ async function checkEnrollmentTicket(userId: number) {
 
 async function getAuditoriums() {
   const auditoriums = await activityRepository.findAuditoriums();
-  if (!auditoriums) throw notFoundError();
+  if (!auditoriums.length) throw notFoundError();
 
   return auditoriums;
 }
@@ -31,14 +31,14 @@ async function getDates(userId: number) {
   await checkEnrollmentTicket(userId);
 
   const dates = await activityRepository.findDates();
-  if (!dates) throw notFoundError();
+  if (!dates.length) throw notFoundError();
 
   return dates;
 }
 
 async function getActivityByDate(dateActivityId: number) {
   const activities = await activityRepository.findActivityByDate(dateActivityId);
-  if (!activities) throw notFoundError();
+  if (!activities.length) throw notFoundError();
 
   return activities;
 }
@@ -67,11 +67,21 @@ async function subscribingActivity(userId: number, activityId: number) {
   await activityRepository.createSubscriber(userId, activityId);
 }
 
+async function deleteSubscribeActivity(userId: number, activityId: number) {
+  if (!activityId) throw badRequestError();
+
+  const subscribe = await activityRepository.findSubscribe(userId, activityId);
+  if (!subscribe.length) throw notFoundError();
+
+  await activityRepository.deleteSubscriber(userId, activityId);
+}
+
 const activityService = {
   getDates,
   getActivityByDate,
   subscribingActivity,
   getAuditoriums,
+  deleteSubscribeActivity,
 };
 
 export default activityService;

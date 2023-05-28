@@ -52,6 +52,24 @@ async function createSubscriber(userId: number, activityId: number) {
   });
 }
 
+async function findSubscribe(userId: number, activityId: number) {
+  return prisma.subscriber.findMany({
+    where: {
+      userId,
+      activityId,
+    },
+  });
+}
+
+async function deleteSubscriber(userId: number, activityId: number) {
+  await prisma.subscriber.deleteMany({
+    where: {
+      userId,
+      activityId,
+    },
+  });
+}
+
 const activityRepository = {
   findDates,
   findActivityByDate,
@@ -59,6 +77,8 @@ const activityRepository = {
   createSubscriber,
   findAuditoriums,
   findSubscribesByUserId,
+  findSubscribe,
+  deleteSubscriber,
 };
 
 export default activityRepository;
