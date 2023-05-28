@@ -45,3 +45,16 @@ export async function subscribingActivity(req: AuthenticatedRequest, res: Respon
     next(error);
   }
 }
+
+export async function deleteSubscribeActivity(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  try {
+    const { userId } = req;
+    const { activityId } = req.body as Record<string, number>;
+
+    await activityService.deleteSubscribeActivity(userId, activityId);
+
+    return res.sendStatus(httpStatus.OK);
+  } catch (error) {
+    next(error);
+  }
+}
