@@ -1,4 +1,4 @@
-import { notFoundError } from '@/errors';
+import { conflictError, notFoundError } from '@/errors';
 import { badRequestError } from '@/errors/bad-request-error';
 import { cannotBookingError } from '@/errors/cannot-booking-error';
 import { cannotListActivityError } from '@/errors/cannot-list-activity-error';
@@ -23,7 +23,7 @@ async function checkEnrollmentTicket(userId: number) {
 
 async function getAuditoriums() {
   const auditoriums = await activityRepository.findAuditoriums();
-  if (!auditoriums) throw notFoundError();
+  if (!auditoriums.length) throw notFoundError();
 
   return auditoriums;
 }
@@ -31,14 +31,14 @@ async function getDates(userId: number) {
   await checkEnrollmentTicket(userId);
 
   const dates = await activityRepository.findDates();
-  if (!dates) throw notFoundError();
+  if (!dates.length) throw notFoundError();
 
   return dates;
 }
 
 async function getActivityByDate(dateActivityId: number) {
   const activities = await activityRepository.findActivityByDate(dateActivityId);
-  if (!activities) throw notFoundError();
+  if (!activities.length) throw notFoundError();
 
   return activities;
 }
@@ -48,10 +48,32 @@ async function subscribingActivity(userId: number, activityId: number) {
 
   await checkEnrollmentTicket(userId);
 
+  const subscribes = await activityRepository.findSubscribesByUserId(userId);
+
   const activity = await activityRepository.findActivityById(activityId);
   if (!activity) throw notFoundError();
 
+  for (const subscribe of subscribes) {
+    const activitySubscribed = subscribe.Activity;
+    if (
+      (activitySubscribed.startsAt.toString() === activity.startsAt.toString() ||
+        activitySubscribed.endsAt.toString() === activity.endsAt.toString()) &&
+      activitySubscribed.dateActivityId === activity.dateActivityId
+    ) {
+      throw conflictError('Activity conflicting day and time!');
+    }
+  }
+
   await activityRepository.createSubscriber(userId, activityId);
+}
+
+async function deleteSubscribeActivity(userId: number, activityId: number) {
+  if (!activityId) throw badRequestError();
+
+  const subscribe = await activityRepository.findSubscribe(userId, activityId);
+  if (!subscribe.length) throw notFoundError();
+
+  await activityRepository.deleteSubscriber(userId, activityId);
 }
 
 const activityService = {
@@ -59,6 +81,7 @@ const activityService = {
   getActivityByDate,
   subscribingActivity,
   getAuditoriums,
+  deleteSubscribeActivity,
 };
 
 export default activityService;

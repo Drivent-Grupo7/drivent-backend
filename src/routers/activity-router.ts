@@ -1,6 +1,12 @@
 import { Router } from 'express';
 import { authenticateToken, validateBody } from '@/middlewares';
-import { listDates, listActivityByDate, subscribingActivity, listAuditoriums } from '@/controllers';
+import {
+  listDates,
+  listActivityByDate,
+  subscribingActivity,
+  listAuditoriums,
+  deleteSubscribeActivity,
+} from '@/controllers';
 import { activitySchema } from '@/schemas/activity-schemas';
 
 const activityRouter = Router();
@@ -10,6 +16,7 @@ activityRouter
   .get('/auditoriums', listAuditoriums)
   .get('/dates', listDates)
   .get('/:dateActivityId', listActivityByDate)
-  .post('', validateBody(activitySchema), subscribingActivity);
+  .post('', validateBody(activitySchema), subscribingActivity)
+  .delete('', validateBody(activitySchema), deleteSubscribeActivity);
 
 export { activityRouter };

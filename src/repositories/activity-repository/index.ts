@@ -1,3 +1,4 @@
+import { Subscriber } from '@prisma/client';
 import { prisma } from '@/config';
 
 async function findDates() {
@@ -24,9 +25,20 @@ async function findActivityByDate(dateActivityId: number) {
 }
 
 async function findActivityById(id: number) {
-  return prisma.activity.findMany({
+  return prisma.activity.findUnique({
     where: {
       id,
+    },
+  });
+}
+
+async function findSubscribesByUserId(userId: number) {
+  return prisma.subscriber.findMany({
+    where: {
+      userId,
+    },
+    include: {
+      Activity: true,
     },
   });
 }
@@ -40,12 +52,33 @@ async function createSubscriber(userId: number, activityId: number) {
   });
 }
 
+async function findSubscribe(userId: number, activityId: number) {
+  return prisma.subscriber.findMany({
+    where: {
+      userId,
+      activityId,
+    },
+  });
+}
+
+async function deleteSubscriber(userId: number, activityId: number) {
+  await prisma.subscriber.deleteMany({
+    where: {
+      userId,
+      activityId,
+    },
+  });
+}
+
 const activityRepository = {
   findDates,
   findActivityByDate,
   findActivityById,
   createSubscriber,
   findAuditoriums,
+  findSubscribesByUserId,
+  findSubscribe,
+  deleteSubscriber,
 };
 
 export default activityRepository;
