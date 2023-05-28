@@ -38,6 +38,7 @@ async function getDates(userId: number) {
 
 async function getActivityByDate(dateActivityId: number) {
   const activities = await activityRepository.findActivityByDate(dateActivityId);
+
   if (!activities.length) throw notFoundError();
 
   return activities;
@@ -51,7 +52,10 @@ async function subscribingActivity(userId: number, activityId: number) {
   const subscribes = await activityRepository.findSubscribesByUserId(userId);
 
   const activity = await activityRepository.findActivityById(activityId);
-  if (!activity) throw notFoundError();
+  if (!activity) {
+    console.log('Ta entrando aqui né PORRA, Deus no comando! Fé!');
+    throw notFoundError();
+  }
 
   for (const subscribe of subscribes) {
     const activitySubscribed = subscribe.Activity;
