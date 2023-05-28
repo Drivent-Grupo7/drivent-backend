@@ -1,4 +1,4 @@
-import { Activity, TicketStatus } from '@prisma/client';
+import { Activity, TicketStatus, Subscriber } from '@prisma/client';
 import faker from '@faker-js/faker';
 import httpStatus from 'http-status';
 import * as jwt from 'jsonwebtoken';
@@ -32,116 +32,6 @@ beforeEach(async () => {
 });
 
 const server = supertest(app);
-
-// describe('GET /activity/auditorium', () => {
-//     it('should respond with status 401 if no token is given', async () => {
-//         const response = await server.get('/activity/auditorium');
-
-//         expect(response.status).toBe(httpStatus.UNAUTHORIZED);
-//       });
-
-//       it('should respond with status 401 if given token is not valid', async () => {
-//         const token = faker.lorem.word();
-
-//         const response = await server.get('/activity/auditorium').set('Authorization', `Bearer ${token}`);
-
-//         expect(response.status).toBe(httpStatus.UNAUTHORIZED);
-//       });
-
-//       it('should respond with status 401 if there is no session for given token', async () => {
-//         const userWithoutSession = await createUser();
-//         const token = jwt.sign({ userId: userWithoutSession.id }, process.env.JWT_SECRET);
-
-//         const response = await server.get('/activity/auditorium').set('Authorization', `Bearer ${token}`);
-
-//         expect(response.status).toBe(httpStatus.UNAUTHORIZED);
-//       });
-
-//       describe("when token is valid", () => {
-
-//         // it('should respond with status 400 if query param ticketId is missing', async () => {
-//         //   const token = await generateValidToken();
-
-//         //   const response = await server.get('/activity/auditorium').set('Authorization', `Bearer ${token}`);
-
-//         //   expect(response.status).toEqual(httpStatus.BAD_REQUEST);
-//         // });
-
-//         // it('should respond with status 404 when given ticket doesnt exist', async () => {
-//         //   const user = await createUser();
-//         //   const token = await generateValidToken(user);
-//         //   await createEnrollmentWithAddress(user);
-
-//         //   const response = await server.get('/activity/auditorium').set('Authorization', `Bearer ${token}`);
-
-//         //   expect(response.status).toEqual(httpStatus.NOT_FOUND);
-//         // });
-
-//         // it('should respond with status 401 when user doesnt own given ticket', async () => {
-//         //   const user = await createUser();
-//         //   const token = await generateValidToken(user);
-//         //   await createEnrollmentWithAddress(user);
-//         //   const ticketType = await createTicketType();
-
-//         //   const otherUser = await createUser();
-//         //   const otherUserEnrollment = await createEnrollmentWithAddress(otherUser);
-//         //   const ticket = await createTicket(otherUserEnrollment.id, ticketType.id, TicketStatus.RESERVED);
-
-//         //   const response = await server.get(`/activity/auditorium`).set('Authorization', `Bearer ${token}`);
-
-//         //   expect(response.status).toEqual(httpStatus.UNAUTHORIZED);
-//         // });
-
-//         it("should respond with status 404 when auditorium doesn't exists", async () => {
-//           const user = await createUser();
-//           const token = await generateValidToken(user);
-
-//           const response = await server.get('/activity/auditorium').set('Authorization', `Bearer ${token}`);
-
-//           expect(response.status).toEqual(httpStatus.NOT_FOUND);
-
-//         })
-
-//         it("should respond with status 200 when has an auditorium", async () => {
-//             const user = await createUser();
-//             const token = await generateValidToken(user);
-//             const enrollment = await createEnrollmentWithAddress(user);
-//             const ticketType = await createTicketTypeWithHotel();
-//             const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
-//             await createPayment(ticket.id, ticketType.price);
-//             const auditorium = await createAuditorium();
-
-//             const response = await server.get("/activity/auditorium").set("Authorization", `Bearer ${token}`);
-
-//             expect(response.status).toEqual(httpStatus.OK);
-
-//             expect(response.body).toEqual([{
-//               id: auditorium.id,
-//               name: auditorium.name,
-//               createdAt: auditorium.createdAt.toISOString(),
-//               updatedAt: null
-//             }]);
-//     })
-// })
-
-//     //   it('should respond with status 404 if there is no event', async () => {
-//     //     await client.del('event');
-//     //     const response = await server.get('/activity/auditorium');
-
-//     //     expect(response.status).toBe(httpStatus.NOT_FOUND);
-//     //   });
-
-//     // it('should respond with status 404 if there is no auditorium', async () => {
-//     //     const event = await fact.createEvent();
-//     //     const response = await server.get(`/activity/auditorium?eventId=${event.id}`);
-
-//     // })
-
-//     //   olhar função do service de activity, tem comentários da laura. Tem que colocar o if para caso seja pago e para caso seja online
-//     //  se for online ele não precisa se cadastrar em atividade nenhuma, porque já é automático. 403 pagante e online, você não tem que
-//     // escolher atividades.
-
-// })
 
 describe('GET /actitity/:dateActivityId', () => {
   it('should respond with status 401 if no token is given', async () => {
@@ -265,8 +155,41 @@ describe('POST /activity', () => {
   });
 
   describe('when token is valid', () => {
-    // TENHO QUE MANDAR O USERID E O ACTIVITYID
-    it('should respond with status 200 with a valid body', async () => {
+    it('should respond with status 400 with a invalid body', async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketTypeWithHotel();
+      const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+      const payment = await createPayment(ticket.id, ticketType.price);
+      const hotel = await createHotel();
+
+      const response = await server.post('/activity').set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).toEqual(httpStatus.BAD_REQUEST);
+    });
+
+    it('should respond with status 404 with a invalid activityId', async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketTypeWithHotel();
+      const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+      const payment = await createPayment(ticket.id, ticketType.price);
+      const hotel = await createHotel();
+
+      const date = await createDateActivity();
+      const auditorium = await createAuditorium();
+      const activity = await createActivity(date.id, auditorium.id);
+
+      const response = await server.post('/activity').set('Authorization', `Bearer ${token}`).send({
+        activityId: 1,
+      });
+
+      expect(response.status).toEqual(httpStatus.NOT_FOUND);
+    });
+
+    it('should respond with status 409 with date or time conflit', async () => {
       const user = await createUser();
       const token = await generateValidToken(user);
       const enrollment = await createEnrollmentWithAddress(user);
@@ -283,26 +206,33 @@ describe('POST /activity', () => {
 
       const subscriber = await createSubscriber(user.id, activity.id);
 
-      console.log('1 verificandio activity', activity);
-      console.log('2 verificandio subscribe', subscriber);
+      const response = await server.post('/activity').set('Authorization', `Bearer ${token}`).send({
+        activityId: subscriber.activityId,
+      });
+
+      expect(response.status).toEqual(httpStatus.CONFLICT);
+    });
+
+    it('should respond with status 200 with a valid body', async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketTypeWithHotel();
+      const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+      const payment = await createPayment(ticket.id, ticketType.price);
+      const hotel = await createHotel();
+
+      const date = await createDateActivity();
+
+      const auditorium = await createAuditorium();
+
+      const activity = await createActivity(date.id, auditorium.id);
 
       const response = await server.post('/activity').set('Authorization', `Bearer ${token}`).send({
         activityId: activity.id,
       });
 
-      console.log('3 Verificando o que está vindo no response', response.body);
-
       expect(response.status).toEqual(httpStatus.OK);
     });
   });
 });
-
-// minhas rotas são essas:
-
-// activityRouter
-//   .all('/*', authenticateToken)
-//   .get('/auditoriums', listAuditoriums)
-//   .get('/dates', listDates)
-//   .get('/:dateActivityId', listActivityByDate) FEITO!!!!
-//   .post('', validateBody(activitySchema), subscribingActivity)
-//   .delete('', validateBody(activitySchema), deleteSubscribeActivity);
