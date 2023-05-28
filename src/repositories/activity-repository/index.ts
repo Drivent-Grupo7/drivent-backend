@@ -1,3 +1,4 @@
+import { Subscriber } from '@prisma/client';
 import { prisma } from '@/config';
 
 async function findDates() {
@@ -24,9 +25,20 @@ async function findActivityByDate(dateActivityId: number) {
 }
 
 async function findActivityById(id: number) {
-  return prisma.activity.findMany({
+  return prisma.activity.findUnique({
     where: {
       id,
+    },
+  });
+}
+
+async function findSubscribesByUserId(userId: number) {
+  return prisma.subscriber.findMany({
+    where: {
+      userId,
+    },
+    include: {
+      Activity: true,
     },
   });
 }
@@ -46,6 +58,7 @@ const activityRepository = {
   findActivityById,
   createSubscriber,
   findAuditoriums,
+  findSubscribesByUserId,
 };
 
 export default activityRepository;

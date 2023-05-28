@@ -1,4 +1,4 @@
-import { notFoundError } from '@/errors';
+import { conflictError, notFoundError } from '@/errors';
 import { badRequestError } from '@/errors/bad-request-error';
 import { cannotBookingError } from '@/errors/cannot-booking-error';
 import { cannotListActivityError } from '@/errors/cannot-list-activity-error';
@@ -48,8 +48,21 @@ async function subscribingActivity(userId: number, activityId: number) {
 
   await checkEnrollmentTicket(userId);
 
+  const subscribes = await activityRepository.findSubscribesByUserId(userId);
+
   const activity = await activityRepository.findActivityById(activityId);
   if (!activity) throw notFoundError();
+
+  for (const subscribe of subscribes) {
+    const activitySubscribed = subscribe.Activity;
+    if (
+      (activitySubscribed.startsAt.toString() === activity.startsAt.toString() ||
+        activitySubscribed.endsAt.toString() === activity.endsAt.toString()) &&
+      activitySubscribed.dateActivityId === activity.dateActivityId
+    ) {
+      throw conflictError('Activity conflicting day and time!');
+    }
+  }
 
   await activityRepository.createSubscriber(userId, activityId);
 }
