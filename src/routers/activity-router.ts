@@ -17,6 +17,6 @@ activityRouter
   .get('/dates', listDates)
   .get('/:dateActivityId', listActivityByDate)
   .post('', validateBody(activitySchema), subscribingActivity)
-  .delete('', validateBody(activitySchema), deleteSubscribeActivity);
+  .delete('/:activityId', deleteSubscribeActivity);
 
 export { activityRouter };
