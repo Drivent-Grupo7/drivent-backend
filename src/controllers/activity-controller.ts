@@ -49,9 +49,9 @@ export async function subscribingActivity(req: AuthenticatedRequest, res: Respon
 export async function deleteSubscribeActivity(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
     const { userId } = req;
-    const { activityId } = req.body as Record<string, number>;
+    const { activityId } = req.params;
 
-    await activityService.deleteSubscribeActivity(userId, activityId);
+    await activityService.deleteSubscribeActivity(userId, Number(activityId));
 
     return res.sendStatus(httpStatus.OK);
   } catch (error) {
