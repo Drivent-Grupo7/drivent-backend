@@ -34,7 +34,7 @@ async function getBooking(userId: number) {
 
 async function getBookingByHotel(hotelId: number) {
   const bookings = await bookingRepository.findByHotelId(hotelId);
-  if (!bookings) throw notFoundError();
+  if (!bookings[0].length) throw notFoundError();
 
   return bookings;
 }

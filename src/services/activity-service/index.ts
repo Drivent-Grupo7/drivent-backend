@@ -82,6 +82,7 @@ const activityService = {
   subscribingActivity,
   getAuditoriums,
   deleteSubscribeActivity,
+  checkEnrollmentTicket,
 };
 
 export default activityService;

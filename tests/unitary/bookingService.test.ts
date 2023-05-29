@@ -43,7 +43,7 @@ describe('getBooking function', () => {
   it('should return notFoundError if there is no booking for the given hotel id', async () => {
     const hotelId = 1;
 
-    jest.spyOn(bookingRepository, 'findByHotelId').mockResolvedValue(null);
+    jest.spyOn(bookingRepository, 'findByHotelId').mockResolvedValue([[]]);
 
     await expect(bookingService.getBookingByHotel(hotelId)).rejects.toEqual(notFoundError());
     expect(bookingRepository.findByHotelId).toHaveBeenCalledWith(hotelId);
