@@ -41,3 +41,9 @@ export function createhAddressWithCEP() {
     uf: 'SP',
   };
 }
+
+export function deleteEnrollment(enrollmentId: number) {
+  return prisma.enrollment.delete({
+    where: { id: enrollmentId },
+  });
+}

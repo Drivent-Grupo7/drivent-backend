@@ -39,6 +39,15 @@ describe('getBooking function', () => {
     await expect(bookingService.getBooking(userId)).rejects.toEqual(notFoundError());
     expect(bookingRepository.findByUserId).toHaveBeenCalledWith(userId);
   });
+
+  it('should return notFoundError if there is no booking for the given hotel id', async () => {
+    const hotelId = 1;
+
+    jest.spyOn(bookingRepository, 'findByHotelId').mockResolvedValue(null);
+
+    await expect(bookingService.getBookingByHotel(hotelId)).rejects.toEqual(notFoundError());
+    expect(bookingRepository.findByHotelId).toHaveBeenCalledWith(hotelId);
+  });
 });
 
 describe('bookingRoomById function', () => {

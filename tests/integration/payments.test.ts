@@ -10,6 +10,7 @@ import {
   createTicket,
   createPayment,
   generateCreditCardData,
+  deleteEnrollment,
 } from '../factories';
 import { cleanDb, generateValidToken } from '../helpers';
 import { prisma, client } from '@/config';
@@ -67,6 +68,19 @@ describe('GET /payments', () => {
       const response = await server.get('/payments?ticketId=1').set('Authorization', `Bearer ${token}`);
 
       expect(response.status).toEqual(httpStatus.NOT_FOUND);
+    });
+
+    it('should respond with status 404 when user doesnt have enrollment by his ticket', async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketType();
+      const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.RESERVED);
+      await deleteEnrollment(enrollment.id);
+
+      const response = await server.get(`/payments?ticketId=${ticket.id}`).set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).toEqual(httpStatus.UNAUTHORIZED);
     });
 
     it('should respond with status 401 when user doesnt own given ticket', async () => {
