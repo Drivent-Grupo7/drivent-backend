@@ -22,7 +22,17 @@ describe('verifyTicketAndEnrollment function', () => {
     await expect(paymentService.verifyTicketAndEnrollment(ticketId, userId)).rejects.toEqual(notFoundError());
   });
 
-  it('should return not found ticket error', async () => {
+  it('should return not found enrollment error', async () => {
+    const userId = 1;
+    const ticket = findTickeyByIdReturn();
+
+    jest.spyOn(ticketsRepository, 'findTickeyById').mockResolvedValue(ticket);
+    jest.spyOn(enrollmentRepository, 'findById').mockResolvedValue(null);
+
+    await expect(paymentService.verifyTicketAndEnrollment(ticket.id, userId)).rejects.toEqual(notFoundError());
+  });
+
+  it('should return unauthorized error', async () => {
     const userId = 2;
     const ticket = findTickeyByIdReturn();
     const enrollment = enrollmentByIdReturn();
