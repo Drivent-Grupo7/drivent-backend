@@ -10,7 +10,6 @@ import {
   createTicket,
   createPayment,
   generateCreditCardData,
-  deleteEnrollment,
 } from '../factories';
 import { cleanDb, generateValidToken } from '../helpers';
 import { prisma, client } from '@/config';
@@ -76,9 +75,13 @@ describe('GET /payments', () => {
       const enrollment = await createEnrollmentWithAddress(user);
       const ticketType = await createTicketType();
       const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.RESERVED);
-      await deleteEnrollment(enrollment.id);
 
-      const response = await server.get(`/payments?ticketId=${ticket.id}`).set('Authorization', `Bearer ${token}`);
+      const anotherUser = await createUser();
+      const anotherToken = await generateValidToken(anotherUser);
+
+      const response = await server
+        .get(`/payments?ticketId=${ticket.id}`)
+        .set('Authorization', `Bearer ${anotherToken}`);
 
       expect(response.status).toEqual(httpStatus.UNAUTHORIZED);
     });

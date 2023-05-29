@@ -164,7 +164,9 @@ describe('POST /activity', () => {
       const payment = await createPayment(ticket.id, ticketType.price);
       const hotel = await createHotel();
 
-      const response = await server.post('/activity').set('Authorization', `Bearer ${token}`);
+      const response = await server.post('/activity').set('Authorization', `Bearer ${token}`).send({
+        activityId: 0,
+      });
 
       expect(response.status).toEqual(httpStatus.BAD_REQUEST);
     });
