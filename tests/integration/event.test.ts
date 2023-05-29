@@ -10,6 +10,11 @@ beforeAll(async () => {
   await cleanDb();
 });
 
+afterAll(async () => {
+  await cleanDb();
+  await client.del('event');
+});
+
 const server = supertest(app);
 
 describe('GET /event', () => {

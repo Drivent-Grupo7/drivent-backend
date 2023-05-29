@@ -21,7 +21,6 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await cleanDb();
-  await client.del('event');
 });
 
 const server = supertest(app);
